@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ECCD Worker Directory</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --cream:#FBF6EC;
+    --sky:#3E8FB0;
+    --marigold:#E8A33D;
+    --leaf:#5C8A52;
+    --clay:#C8553D;
+    --ink:#2B2620;
+    --paper:#FFFFFF;
+    --line:#E4DAC6;
+    --display: 'Baloo 2', 'Trebuchet MS', sans-serif;
+    --body: 'Nunito Sans', 'Segoe UI', sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito+Sans:wght@400;600;700&display=swap');
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--body);}
+  h1,h2,h3,.brand{font-family:var(--display);}
+
+  /* ===== Top bar ===== */
+  .topbar{
+    background:var(--paper);
+    border-bottom:3px solid var(--marigold);
+    display:flex;align-items:center;
+    padding:10px 22px;
+    gap:18px;
+    flex-wrap:wrap;
+    position:sticky;top:0;z-index:50;
+  }
+  .brand{font-weight:800;font-size:1.3rem;color:var(--sky);display:flex;align-items:center;gap:8px;margin-right:auto;}
+  .brand .badge{
+    width:34px;height:34px;border-radius:50%;background:var(--badgeColor, #E8A33D);
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:1rem;
+    cursor:pointer;transition:.2s;
+  }
+  .brand .badge:hover{opacity:.85;}
+  nav.tabs{display:flex;gap:8px;flex-wrap:wrap;}
+  nav.tabs button{
+    border:none;background:transparent;padding:12px 20px;border-radius:24px;
+    font-family:var(--body);font-weight:700;font-size:0.95rem;color:var(--ink);cursor:pointer;
+    transition:.2s ease;position:relative;overflow:hidden;
+    background:var(--cream);
+  }
+  nav.tabs button::before{
+    content:'';position:absolute;inset:0;background:linear-gradient(135deg, rgba(62,143,176,.05), rgba(92,138,82,.05));
+    opacity:0;transition:.2s;
+  }
+  nav.tabs button:hover{
+    background:#F1E8D6;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  }
+  nav.tabs button.active{
+    background:var(--sky);color:white;
+    box-shadow:0 6px 20px rgba(62,143,176,.3);
+    font-weight:800;
+  }
+  nav.tabs button.active::before{
+    opacity:1;
+  }
+
+  .admin-area{display:flex;align-items:center;gap:10px;}
+  .pill-btn{
+    border:2px solid var(--clay);color:var(--clay);background:transparent;
+    padding:7px 14px;border-radius:18px;font-weight:700;cursor:pointer;font-family:var(--body);font-size:0.85rem;
+  }
+  .pill-btn:hover{background:var(--clay);color:white;}
+  .pill-btn.solid{background:var(--leaf);border-color:var(--leaf);color:white;}
+  .pill-btn.solid:hover{opacity:.85;}
+  .admin-tag{font-size:0.78rem;background:var(--leaf);color:white;padding:4px 10px;border-radius:12px;font-weight:700;}
+
+  main{
+    max-width:1100px;margin:0 auto 20px;padding:26px 20px 60px;
+    background:linear-gradient(135deg, rgba(251,246,236,.6) 0%, rgba(239,246,251,.6) 100%);
+    border-radius:16px;
+  }
+
+  .page-head{margin-bottom:24px;padding:20px;background:var(--paper);border-radius:14px;border-left:5px solid var(--sky);}
+  .page-head h2{font-size:1.6rem;margin:0 0 6px;color:var(--ink);}
+  .page-head p{margin:0;color:#766B58;font-size:0.95rem;}
+
+  /* ===== Directory toolbar ===== */
+  .toolbar{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:18px 0;
+    background:var(--paper);padding:16px;border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .search{
+    flex:1;min-width:200px;padding:10px 14px;border:2px solid var(--line);border-radius:12px;
+    font-family:var(--body);font-size:0.95rem;background:var(--paper);
+  }
+  .search:focus{outline:none;border-color:var(--sky);}
+  select.filter{padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--paper);font-family:var(--body);font-weight:600;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:10px;}
+  .grid.view-large{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
+  .grid.view-medium{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .grid.view-small{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+  .grid.view-list{grid-template-columns:1fr;gap:10px;}
+
+  .view-switch{display:flex;gap:4px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:4px;}
+  .view-switch button{
+    border:none;background:transparent;padding:7px 10px;border-radius:9px;cursor:pointer;
+    font-size:1rem;color:#9A8F78;line-height:1;
+  }
+  .view-switch button:hover{background:#F1E8D6;}
+  .view-switch button.active{background:var(--sky);color:white;}
+
+  .card{
+    background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:18px;
+    position:relative;transition:.2s ease;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  }
+  .card:hover{
+    border-color:var(--sky);transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(62,143,176,.15);
+  }
+  .card .stripe{position:absolute;left:0;top:18px;bottom:18px;width:5px;border-radius:4px;background:var(--marigold);}
+  .card-inner{padding-left:12px;}
+  .card .name{font-family:var(--display);font-weight:700;font-size:1.15rem;margin:0 0 2px;}
+  .card .role{color:var(--sky);font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
+  .card .meta{font-size:0.86rem;color:#534A3B;line-height:1.6;}
+  .card .meta b{color:var(--ink);}
+  .card .meta .meta-item{display:block;}
+  .card .meta .status-line{display:flex;align-items:center;}
+  .status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;}
+  .status-active{background:var(--leaf);}
+  .status-leave{background:var(--clay);}
+  .card-actions{margin-top:12px;display:flex;gap:8px;}
+
+  /* Small icon view: condensed card */
+  .view-small .card{padding:13px;}
+  .view-small .card .name{font-size:0.98rem;}
+  .view-small .card .role{font-size:0.7rem;margin-bottom:6px;}
+  .view-small .card .meta{font-size:0.78rem;line-height:1.45;}
+  .view-small .card .meta .extra-line{display:none;}
+  .view-small .card-actions{margin-top:8px;}
+  .view-small .mini-btn{padding:5px 8px;font-size:0.72rem;}
+
+  /* List view: horizontal row */
+  .view-list .card{display:flex;align-items:center;gap:18px;padding:14px 18px;}
+  .view-list .card .stripe{position:static;width:5px;height:42px;flex-shrink:0;}
+  .view-list .card-inner{padding-left:0;display:flex;align-items:center;gap:22px;flex:1;flex-wrap:wrap;}
+  .view-list .card .name{margin:0;min-width:150px;}
+  .view-list .card .role{margin:0;min-width:160px;}
+  .view-list .card .meta{display:flex;gap:18px;flex-wrap:wrap;line-height:1.4;flex:1;}
+  .view-list .card .meta .meta-item{display:inline-flex;align-items:center;white-space:nowrap;}
+  .view-list .card-actions{margin:0;flex-shrink:0;}
+  .mini-btn{font-size:0.78rem;border:none;padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-family:var(--body);}
+  .mini-btn.edit{background:#EFF6FB;color:var(--sky);}
+  .mini-btn.del{background:#FBEFEC;color:var(--clay);}
+  .mini-btn:hover{filter:brightness(.93);}
+
+  .empty{text-align:center;padding:50px 20px;color:#9A8F78;}
+  .empty b{display:block;font-family:var(--display);font-size:1.2rem;color:var(--ink);margin-bottom:6px;}
+
+  /* ===== Form / Modal ===== */
+  .overlay{position:fixed;inset:0;background:rgba(43,38,32,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal{background:var(--paper);border-radius:18px;padding:26px;max-width:440px;width:100%;max-height:88vh;overflow-y:auto;}
+  .modal h3{margin:0 0 14px;font-size:1.3rem;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:0.8rem;font-weight:700;color:#766B58;margin-bottom:4px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:9px 11px;border:2px solid var(--line);border-radius:10px;font-family:var(--body);font-size:0.92rem;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--sky);}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions button{flex:1;padding:10px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-family:var(--body);}
+  .btn-primary{background:var(--sky);color:white;}
+  .btn-cancel{background:#F1E8D6;color:var(--ink);}
+
+  /* Login */
+  .login-box{max-width:340px;margin:60px auto;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:30px;text-align:center;}
+  .login-box .badge-big{width:56px;height:56px;border-radius:50%;background:var(--marigold);color:white;font-family:var(--display);font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.4rem;}
+  .login-box h2{margin:0 0 4px;}
+  .login-box p{color:#766B58;font-size:0.88rem;margin-top:0;}
+  .login-box .field{text-align:left;margin-top:16px;}
+  .hint{font-size:0.75rem;color:#A89A7E;margin-top:10px;}
+  .error-msg{color:var(--clay);font-size:0.82rem;font-weight:700;margin-top:8px;}
+  .pw-wrap{position:relative;display:flex;align-items:center;}
+  .pw-wrap input{padding-right:42px;}
+  .pw-toggle{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    border:none;background:transparent;cursor:pointer;font-size:1.05rem;
+    padding:4px 6px;line-height:1;border-radius:8px;
+  }
+  .pw-toggle:hover{background:#F1E8D6;}
+
+  /* Contacts / Photos / Other pages */
+  .info-card{
+    background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;
+    position:relative;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-left:5px solid var(--marigold);
+    transition:.2s ease;
+  }
+  .info-card:hover{
+    box-shadow:0 6px 16px rgba(0,0,0,0.1);
+    transform:translateY(-2px);
+  }
+  .info-card h3{margin:0 0 8px;font-size:1.05rem;color:var(--sky);}
+  .info-card p{margin:4px 0;font-size:0.92rem;line-height:1.6;}
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;}
+  .photo-tile{
+    background:var(--paper);border:2px solid var(--line);border-radius:14px;overflow:hidden;text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    transition:.2s ease;
+  }
+  .photo-tile:hover{
+    box-shadow:0 6px 16px rgba(0,0,0,0.1);
+    transform:translateY(-3px);
+  }
+  .photo-tile .ph{
+    height:110px;background:linear-gradient(135deg,var(--sky),var(--marigold));
+    display:flex;align-items:center;justify-content:center;color:white;
+    font-family:var(--display);font-size:1.6rem;font-weight:800;
+    background-size:cover;background-position:center;
+    position:relative;margin:0;cursor:default;
+  }
+  .photo-tile .ph.has-photo{font-size:0;}
+  .photo-tile .ph input[type=file]{display:none;}
+  .photo-tile .ph-edit-icon{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(43,38,32,0);font-size:1.3rem;opacity:0;transition:.15s;cursor:pointer;
+  }
+  .photo-tile .ph:hover .ph-edit-icon{background:rgba(43,38,32,.4);opacity:1;}
+  .photo-tile .ph-rm{
+    position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;
+    background:rgba(0,0,0,.55);color:white;border:none;font-size:0.75rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;
+  }
+  .photo-tile .ph-rm:hover{background:var(--clay);}
+
+  .gallery-tile{position:relative;}
+  .gallery-tile .ph-rm{top:6px;right:6px;}
+  .ph.gallery-add{
+    cursor:pointer;background:#F1E8D6;color:#B6AB94;font-size:1.8rem;font-weight:700;
+    border:2px dashed var(--line);
+  }
+  .ph.gallery-add:hover{border-color:var(--sky);color:var(--sky);background:#EFF6FB;}
+  .ph.gallery-add input[type=file]{display:none;}
+  .photo-tile .cap{padding:8px;font-size:0.82rem;font-weight:700;}
+
+  /* ===== Intro / splash screen (slideshow) ===== */
+  .intro{
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:flex-start;
+    padding:0;
+  }
+  .intro-slides{position:absolute;inset:0;z-index:0;}
+  .intro-slide{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    opacity:0;
+    transition:opacity 1.6s ease;
+  }
+  .intro-slide.active{opacity:1;}
+  .intro-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(20,24,18,.35) 0%, rgba(20,24,18,.15) 35%, rgba(20,24,18,.85) 100%);
+    z-index:1;
+  }
+  .intro-dots{
+    position:absolute;bottom:22px;right:28px;z-index:3;
+    display:flex;gap:8px;
+  }
+  .intro-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.45);transition:.2s;}
+  .intro-dots span.active{background:var(--marigold);width:22px;border-radius:5px;}
+
+  .intro-content{
+    position:relative;z-index:2;
+    width:100%;
+    padding:60px 8vw 64px;
+    color:white;
+  }
+  .intro-eyebrow{
+    font-size:0.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--marigold);margin-bottom:14px;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .intro-eyebrow::before{content:"";width:28px;height:2px;background:var(--marigold);display:inline-block;}
+  .intro h1{
+    font-size:clamp(2rem,4.2vw,3.1rem);line-height:1.15;margin:0 0 16px;color:white;
+    max-width:780px;
+    text-shadow:0 2px 18px rgba(0,0,0,.25);
+  }
+  .intro h1 span{color:var(--marigold);}
+  .intro p.lead{
+    color:rgba(255,255,255,.88);font-size:1.04rem;line-height:1.65;max-width:520px;margin:0 0 30px;
+  }
+  .intro-row{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+  .intro-stats{display:flex;gap:26px;flex-wrap:wrap;}
+  .intro-stats .stat{text-align:left;}
+  .intro-stats .stat b{display:block;font-family:var(--display);font-size:1.5rem;color:white;}
+  .intro-stats .stat span{font-size:0.72rem;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .intro-enter{
+    background:var(--marigold);color:white;border:none;
+    padding:15px 34px;border-radius:28px;
+    font-family:var(--body);font-weight:700;font-size:1rem;cursor:pointer;
+    box-shadow:0 10px 24px rgba(232,163,61,.4);
+    transition:.18s;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .intro-enter:hover{background:#D6912E;transform:translateY(-2px);}
+  .intro-brandmark{
+    position:absolute;top:26px;left:28px;z-index:3;
+    display:flex;align-items:center;gap:10px;color:white;font-family:var(--display);font-weight:700;font-size:1.05rem;
+  }
+  .intro-brandmark .badge{
+    width:32px;height:32px;border-radius:50%;background:var(--badgeColor, #E8A33D);
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.9rem;
+  }
+
+  /* Logo slots on intro */
+  .intro-logos{
+    position:absolute;top:24px;right:28px;z-index:3;
+    display:flex;gap:12px;
+  }
+  .logo-slot{
+    width:56px;height:56px;border-radius:50%;
+    background:rgba(255,255,255,.94);
+    border:2px solid rgba(255,255,255,.7);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;
+  }
+  .logo-slot img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+  .logo-slot .plus{font-size:1rem;color:#D8CFB8;}
+
+  .intro-edit-btn{
+    position:absolute;top:92px;right:28px;z-index:3;
+    background:rgba(255,255,255,.95);border:none;
+    padding:9px 16px;border-radius:18px;font-weight:700;font-size:0.82rem;
+    cursor:pointer;font-family:var(--body);box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  .intro-edit-btn:hover{background:white;}
+
+  /* Back button in main app */
+  .back-btn{
+    border:none;background:#F1E8D6;color:var(--ink);
+    padding:8px 14px;border-radius:18px;font-weight:700;font-size:0.85rem;
+    cursor:pointer;font-family:var(--body);display:inline-flex;align-items:center;gap:6px;
+  }
+  .back-btn:hover{background:var(--marigold);color:white;}
+
+  /* ===== Profile page (Facebook-style) ===== */
+  .profile-wrap{margin:-26px -20px 0;}
+  .cover{
+    position:relative;
+    height:240px;
+    background-size:cover;background-position:center;
+    background-color:#F5F5F5;
+  }
+  .cover-edit-btn{
+    position:absolute;bottom:14px;right:18px;
+    background:rgba(255,255,255,.95);border:none;
+    padding:8px 14px;border-radius:18px;font-weight:700;font-size:0.82rem;
+    cursor:pointer;font-family:var(--body);display:flex;align-items:center;gap:6px;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+  }
+  .cover-edit-btn:hover{background:white;}
+  .profile-head{
+    max-width:1100px;margin:0 auto;padding:0 28px;
+    display:flex;align-items:flex-end;gap:20px;justify-content:center;
+    margin-top:-58px;position:relative;
+    flex-wrap:wrap;
+  }
+  .avatar-wrap{position:relative;flex-shrink:0;}
+  .avatar{
+    width:128px;height:128px;border-radius:50%;
+    border:5px solid var(--cream);
+    background:linear-gradient(135deg,var(--marigold),var(--clay));
+    display:flex;align-items:center;justify-content:center;
+    color:white;font-family:var(--display);font-weight:800;font-size:2.2rem;
+    overflow:hidden;
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .avatar-edit-btn{
+    position:absolute;bottom:6px;right:6px;
+    width:34px;height:34px;border-radius:50%;
+    background:var(--sky);color:white;border:3px solid var(--cream);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem;
+  }
+  .avatar-edit-btn:hover{background:#347C99;}
+  .profile-namebox{padding-bottom:14px;flex:1;min-width:200px;}
+  .profile-namebox h2{margin:0 0 4px;font-size:1.6rem;}
+  .profile-namebox p{margin:0;color:#766B58;font-size:0.92rem;}
+  .profile-actions{padding-bottom:14px;display:flex;gap:10px;}
+
+  .profile-body{max-width:1100px;margin:24px auto 0;padding:0 28px;}
+  .profile-bio{
+    background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:24px;position:relative;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-left:5px solid var(--sky);
+  }
+  .profile-bio h3{margin:0 0 10px;font-size:1rem;color:var(--sky);}
+  .profile-bio p{margin:0;font-size:0.95rem;line-height:1.7;color:#534A3B;white-space:pre-line;}
+  .edit-link{position:absolute;top:18px;right:18px;font-size:0.78rem;}
+
+  .org-logos-row{display:flex;gap:14px;margin-top:18px;flex-wrap:wrap;}
+  .org-logo-card{
+    background:var(--paper);border:2px solid var(--line);border-radius:14px;
+    padding:14px;width:120px;text-align:center;
+  }
+  .org-logo-card .circle{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 8px;
+    background:#F1E8D6;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;cursor:pointer;border:2px dashed var(--line);
+  }
+  .org-logo-card .circle img{width:100%;height:100%;object-fit:cover;}
+  .org-logo-card .circle .plus{font-size:1.2rem;color:#B6AB94;font-weight:700;}
+  .org-logo-card span{font-size:0.75rem;font-weight:700;color:#766B58;}
+  .org-logo-card input[type=file]{display:none;}
+
+  /* Profile slideshow */
+  .profile-slideshow{
+    background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:24px;margin-top:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    border-left:5px solid var(--leaf);
+  }
+  .profile-slideshow h3{margin:0 0 14px;font-size:1rem;color:var(--sky);}
+  .pf-slide-frame{
+    position:relative;height:260px;border-radius:14px;overflow:hidden;
+    background:#EFE7D4;
+  }
+  .pf-slide{
+    position:absolute;inset:0;background-size:cover;background-position:center;
+    opacity:0;transition:opacity 1s ease;
+  }
+  .pf-slide.active{opacity:1;}
+  .pf-slide-empty{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#A89A7E;font-size:0.9rem;text-align:center;padding:20px;
+  }
+  .pf-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
+  .pf-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);}
+  .pf-dots span.active{background:var(--marigold);width:18px;border-radius:4px;}
+  .pf-thumbs{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .pf-thumb{
+    width:78px;height:62px;border-radius:9px;overflow:hidden;position:relative;
+    border:2px solid var(--line);background-size:cover;background-position:center;cursor:pointer;
+  }
+  .pf-thumb .rm{
+    position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;
+    background:rgba(0,0,0,.55);color:white;border:none;font-size:0.7rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .pf-add-tile{
+    width:78px;height:62px;border-radius:9px;border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:#B6AB94;font-size:1.3rem;
+  }
+  .pf-add-tile:hover{border-color:var(--sky);color:var(--sky);}
+  .pf-add-tile input{display:none;}
+  .pf-save-row{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap;}
+  .pf-unsaved{font-size:0.8rem;color:var(--clay);font-weight:700;}
+  .pf-saved{font-size:0.8rem;color:var(--leaf);font-weight:700;}
+</style>
+</head>
+<body>
+
+<div id="introScreen" class="intro">
+  <div class="intro-slides" id="introSlides"></div>
+  <div class="intro-overlay"></div>
+  <div class="intro-brandmark"><span class="badge" id="introBrandBadge">EC</span> ECCD Worker Directory</div>
+  <div class="intro-logos" id="introLogos">
+    <span class="logo-slot" data-slot="1"></span>
+    <span class="logo-slot" data-slot="2"></span>
+    <span class="logo-slot" data-slot="3"></span>
+  </div>
+  <button class="intro-edit-btn" id="introEditBtn" style="display:none;">✏️ Edit Slideshow</button>
+  <button class="intro-edit-btn" id="introLoginBtn" style="display:none;">🔒 Admin </button>
+  <div class="intro-dots" id="introDots"></div>
+
+  <div class="intro-content">
+    <div class="intro-eyebrow">Early Childhood Care &amp; Development</div>
+    <h1>Caring for <span>every child's</span> first steps in learning</h1>
+    <p class="lead">"Browse and search for Child Development Workers in every barangay day care center, including their contact information, employment status, and service details—all in one convenient location."</p>
+    <div class="intro-row">
+      <button class="intro-enter" id="enterBtn">Let's Get Started →</button>
+      <div class="intro-stats">
+        <div class="stat"><b id="introCount">4</b><span>Workers</span></div>
+        <div class="stat"><b>4</b><span>Centers</span></div>
+        <div class="stat"><b>24/7</b><span>Access</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mainApp" style="display:none;">
+  <div class="topbar">
+    <div class="brand"><span class="badge" id="topbarBadge">EC</span> ECCD Worker Directory</div>
+    <button class="back-btn" id="backHomeBtn">← Back to Home</button>
+    <nav class="tabs" id="tabs">
+      <button data-tab="profile" class="active">Profile</button>
+      <button data-tab="directory">Directory</button>
+      <button data-tab="contacts">Contacts</button>
+      <button data-tab="photos">Photos</button>
+      <button data-tab="other">Other</button>
+    </nav>
+    <div class="admin-area" id="adminArea"></div>
+  </div>
+
+  <main id="app"></main>
+</div>
+
+<script>
+/* ---------- In-memory data ---------- */
+let workers = [
+  {id:1,name:"Maria Santos",role:"Child Development Worker",barangay:"Poblacion",center:"Poblacion Day Care Center",contact:"0917-123-4567",email:"maria.santos@eccd.gov.ph",years:5,status:"active",notes:"Lead facilitator for 3-4 yr olds."},
+  {id:2,name:"Jonathan Reyes",role:"CDW Supervisor",barangay:"San Isidro",center:"San Isidro CDC",contact:"0918-234-5678",email:"j.reyes@eccd.gov.ph",years:8,status:"active",notes:"Oversees 4 barangay centers."},
+  {id:3,name:"Liza Fernandez",role:"Child Development Worker",barangay:"Mabini",center:"Mabini Day Care Center",contact:"0919-345-6789",email:"liza.f@eccd.gov.ph",years:2,status:"leave",notes:"On maternity leave until Aug 2026."},
+  {id:4,name:"Carlos Dimaano",role:"Nutrition Aide",barangay:"Rizal",center:"Rizal Day Care Center",contact:"0920-456-7890",email:"c.dimaano@eccd.gov.ph",years:3,status:"active",notes:"Handles supplemental feeding program."},
+];
+let nextId = 5;
+let isAdmin = false;
+let pfSlideIdx = 0;
+let pfSlideTimer = null;
+let currentTab = "profile";
+let editingId = null;
+let searchTerm = "";
+let filterStatus = "all";
+let viewMode = "medium";
+
+const ADMIN_USER = "eccd.calatrava@gmail.com"; // just used to pre-fill the hint; real check happens server-side
+const SESSION_KEY = "eccd_admin_session";
+
+let orgProfile = {
+  cover: null,
+  avatar: null,
+  badgeText: "EC",
+  badgeColor: "#E8A33D",
+  name: "ECCD Calatrava",
+  tagline: "Early Childhood Care & Development Program",
+  bio: "Ang ECCD Calatrava maoy responsable sa pag-suporta sa mga Child Development Workers ug barangay day care centers sa tibuok munisipyo. Among gipangunahan ang pag-asikaso sa kahimsog, nutrisyon, ug sayo nga edukasyon sa mga bata gikan natawo hangtod 6 anyos.",
+  partnerLogos: [null, null, null],
+  introSlides: [
+    "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1587616211892-b59d5ee75a30?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1571210862729-78a52d3779a2?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1564429097439-e5ee495f4e3c?auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1600&q=80",
+  ],
+  galleryPhotos: [],
+  contacts: {
+    office: "📍 Municipal Hall Annex, Talisay, Central Visayas, Philippines",
+    phone: "(032) 555-0142",
+    email: "eccd.office@example.gov.ph",
+    hours: "Monday – Friday, 8:00 AM – 5:00 PM",
+  },
+  others: {
+    aboutTitle: "About ECCD",
+    aboutText: "The Early Childhood Care and Development (ECCD) program supports the holistic development of children from birth to age 6 through trained Child Development Workers based in barangay day care centers.",
+    announcementsTitle: "Announcements",
+    announcementsText: "• Annual CDW refresher training — schedule to be posted soon.\n• Nutrition month feeding program reports due end of July.",
+    resourcesTitle: "Resources",
+    resourcesText: "Forms, training modules, and reporting templates will be made available here for download.",
+  },
+};
+orgProfile.slideshowDraft = orgProfile.introSlides.slice();
+
+/* ---------- Render root ---------- */
+function render(){
+  renderIntroLogos();
+  applyBadgeColor();
+  renderTopbarAdmin();
+  document.querySelectorAll('#tabs button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===currentTab);
+  });
+  const app = document.getElementById('app');
+  if(currentTab==='profile') app.innerHTML = renderProfile();
+  else if(currentTab==='directory') app.innerHTML = renderDirectory();
+  else if(currentTab==='contacts') app.innerHTML = renderContacts();
+  else if(currentTab==='photos') app.innerHTML = renderPhotos();
+  else app.innerHTML = renderOther();
+  attachDirectoryEvents();
+  if(currentTab==='profile') attachProfileEvents();
+  if(currentTab==='contacts') attachContactsEvents();
+  if(currentTab==='other') attachOtherEvents();
+  if(currentTab==='photos') attachPhotosEvents();
+  schedulePersist();
+}
+
+function renderTopbarAdmin(){
+  const el = document.getElementById('adminArea');
+  if(isAdmin){
+    el.innerHTML = `<span class="admin-tag">● Admin</span><button class="pill-btn" id="logoutBtn">Log out</button>`;
+    document.getElementById('logoutBtn').onclick = ()=>{isAdmin=false; localStorage.removeItem(SESSION_KEY); render();};
+  } else {
+    el.innerHTML = `<button class="pill-btn solid" id="loginBtn">Admin Log In</button>`;
+    document.getElementById('loginBtn').onclick = showLogin;
+  }
+}
+
+function applyBadgeColor(){
+  document.documentElement.style.setProperty('--badgeColor', orgProfile.badgeColor);
+  const introBadge = document.getElementById('introBrandBadge');
+  const topbarBadge = document.getElementById('topbarBadge');
+  if(introBadge) introBadge.textContent = orgProfile.badgeText;
+  if(topbarBadge) topbarBadge.textContent = orgProfile.badgeText;
+}
+
+/* ---------- Directory tab ---------- */
+function getFiltered(){
+  return workers.filter(w=>{
+    const matchesSearch = (w.name+w.role+w.barangay+w.center).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus==='all' || w.status===filterStatus;
+    return matchesSearch && matchesStatus;
+  }).sort((a,b)=> a.barangay.localeCompare(b.barangay, undefined, {sensitivity:'base'}));
+}
+
+function renderDirectory(){
+  const list = getFiltered();
+  return `
+    <div class="page-head">
+      <h2>Child Development Worker Directory</h2>
+      <p>${workers.length} registered worker${workers.length!==1?'s':''} across barangay day care centers.</p>
+    </div>
+    <div class="toolbar">
+      <input class="search" id="searchInput" placeholder="Search by name, role, barangay, or center..." value="${escapeHtml(searchTerm)}">
+      <select class="filter" id="statusFilter">
+        <option value="all" ${filterStatus==='all'?'selected':''}>All statuses</option>
+        <option value="active" ${filterStatus==='active'?'selected':''}>Active</option>
+        <option value="leave" ${filterStatus==='leave'?'selected':''}>On leave</option>
+      </select>
+      <div class="view-switch">
+        <button data-view="large" class="${viewMode==='large'?'active':''}" title="Large icons">⬛</button>
+        <button data-view="medium" class="${viewMode==='medium'?'active':''}" title="Medium icons">▦</button>
+        <button data-view="small" class="${viewMode==='small'?'active':''}" title="Small icons">▪</button>
+        <button data-view="list" class="${viewMode==='list'?'active':''}" title="List">☰</button>
+      </div>
+      ${isAdmin ? `<button class="pill-btn solid" id="addWorkerBtn">+ Add Worker</button>` : ``}
+    </div>
+    <div class="grid view-${viewMode}" id="workerGrid">
+      ${list.length? list.map(workerCard).join('') : `<div class="empty" style="grid-column:1/-1"><b>No workers found</b>Try a different search or filter.</div>`}
+    </div>
+  `;
+}
+
+function renderGridOnly(){
+  const grid = document.getElementById('workerGrid');
+  if(!grid) return;
+  const list = getFiltered();
+  grid.innerHTML = list.length? list.map(workerCard).join('') : `<div class="empty" style="grid-column:1/-1"><b>No workers found</b>Try a different search or filter.</div>`;
+  attachGridEvents();
+}
+
+function workerCard(w){
+  return `
+    <div class="card">
+      <div class="stripe"></div>
+      <div class="card-inner">
+        <div class="name">${escapeHtml(w.name)}</div>
+        <div class="role">${escapeHtml(w.role)}</div>
+        <div class="meta">
+          <span class="meta-item status-line"><span class="status-dot status-${w.status}"></span>${w.status==='active'?'Active':'On leave'}</span>
+          <span class="meta-item"><b>Center:</b> ${escapeHtml(w.center)}</span>
+          <span class="meta-item"><b>Barangay:</b> ${escapeHtml(w.barangay)}</span>
+          <span class="meta-item"><b>Contact:</b> ${escapeHtml(w.contact)}</span>
+          <span class="meta-item extra-line"><b>Years of service:</b> ${w.years}</span>
+        </div>
+        ${isAdmin? `<div class="card-actions">
+          <button class="mini-btn edit" data-edit="${w.id}">Edit</button>
+          <button class="mini-btn del" data-del="${w.id}">Remove</button>
+        </div>`:``}
+      </div>
+    </div>
+  `;
+}
+
+function attachDirectoryEvents(){
+  const s = document.getElementById('searchInput');
+  if(s){ s.oninput = (e)=>{searchTerm=e.target.value; renderGridOnly();} }
+  const f = document.getElementById('statusFilter');
+  if(f){ f.onchange = (e)=>{filterStatus=e.target.value; renderGridOnly();} }
+  document.querySelectorAll('.view-switch button').forEach(btn=>{
+    btn.onclick = ()=>{ viewMode = btn.dataset.view; render(); };
+  });
+  const addBtn = document.getElementById('addWorkerBtn');
+  if(addBtn){ addBtn.onclick = ()=>showWorkerForm(null); }
+  attachGridEvents();
+}
+
+function attachGridEvents(){
+  document.querySelectorAll('[data-edit]').forEach(b=>{
+    b.onclick = ()=>showWorkerForm(parseInt(b.dataset.edit));
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick = ()=>{
+      if(confirm('Remove this worker from the directory?')){
+        workers = workers.filter(w=>w.id!==parseInt(b.dataset.del));
+        renderGridOnly();
+      }
+    };
+  });
+}
+
+/* ---------- Worker form modal ---------- */
+function showWorkerForm(id){
+  editingId = id;
+  const w = id ? workers.find(x=>x.id===id) : {name:'',role:'Child Development Worker',barangay:'',center:'',contact:'',email:'',years:0,status:'active',notes:''};
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>${id? 'Edit Worker' : 'Add New Worker'}</h3>
+      <div class="field"><label>Full name</label><input id="f_name" value="${escapeHtml(w.name)}"></div>
+      <div class="field"><label>Role / Position</label><input id="f_role" value="${escapeHtml(w.role)}"></div>
+      <div class="field"><label>Day care center</label><input id="f_center" value="${escapeHtml(w.center)}"></div>
+      <div class="field"><label>Barangay</label><input id="f_barangay" value="${escapeHtml(w.barangay)}"></div>
+      <div class="field"><label>Contact number</label><input id="f_contact" value="${escapeHtml(w.contact)}"></div>
+      <div class="field"><label>Email</label><input id="f_email" value="${escapeHtml(w.email)}"></div>
+      <div class="field"><label>Years of service</label><input id="f_years" type="number" min="0" value="${w.years}"></div>
+      <div class="field"><label>Status</label>
+        <select id="f_status">
+          <option value="active" ${w.status==='active'?'selected':''}>Active</option>
+          <option value="leave" ${w.status==='leave'?'selected':''}>On leave</option>
+        </select>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="f_notes" rows="2">${escapeHtml(w.notes||'')}</textarea></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        <button class="btn-primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('cancelBtn').onclick = ()=> overlay.remove();
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('saveBtn').onclick = ()=>{
+    const data = {
+      name: document.getElementById('f_name').value.trim(),
+      role: document.getElementById('f_role').value.trim(),
+      center: document.getElementById('f_center').value.trim(),
+      barangay: document.getElementById('f_barangay').value.trim(),
+      contact: document.getElementById('f_contact').value.trim(),
+      email: document.getElementById('f_email').value.trim(),
+      years: parseInt(document.getElementById('f_years').value)||0,
+      status: document.getElementById('f_status').value,
+      notes: document.getElementById('f_notes').value.trim(),
+    };
+    if(!data.name){ alert('Please enter a name.'); return; }
+    if(id){
+      Object.assign(workers.find(x=>x.id===id), data);
+    } else {
+      workers.push({id: nextId++, ...data});
+    }
+    overlay.remove();
+    render();
+  };
+}
+
+/* ---------- Settings modal ---------- */
+/* ---------- Load / persist directory data (Netlify Blobs via functions) ---------- */
+let saveTimer = null;
+let dataLoaded = false;
+
+async function loadData(){
+  try{
+    const r = await callFn('get-data', {});
+    if(r.ok && r.data){
+      if(Array.isArray(r.data.workers)) workers = r.data.workers;
+      if(typeof r.data.nextId === 'number') nextId = r.data.nextId;
+      if(r.data.orgProfile) orgProfile = Object.assign({}, orgProfile, r.data.orgProfile);
+    }
+  }catch(e){ /* offline or function unreachable — keep local seed data */ }
+  dataLoaded = true;
+}
+
+function schedulePersist(){
+  if(!isAdmin) return;
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(doPersist, 800);
+}
+
+async function doPersist(){
+  const token = localStorage.getItem(SESSION_KEY);
+  if(!token) return;
+  try{
+    await callFn('save-data', { sessionToken: token, data: { workers, nextId, orgProfile } });
+  }catch(e){ console.error('Auto-save failed:', e); }
+}
+async function callFn(name, data){
+  const res = await fetch(`/.netlify/functions/${name}`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data),
+  });
+  let json = {};
+  try{ json = await res.json(); }catch{}
+  return { ok: res.ok, ...json };
+}
+
+function showLogin(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="login-box" style="margin:0;border:none;padding:0;">
+        <div class="badge-big">EC</div>
+        <h2>Admin Log In</h2>
+        <p>Manage the worker directory</p>
+
+        <div id="stepEmail">
+          <div class="field">
+            <label>Gmail</label>
+            <input id="loginUser" placeholder="you@gmail.com" value="${ADMIN_USER}">
+          </div>
+          <div id="loginError"></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" id="loginCancel">Cancel</button>
+            <button class="btn-primary" id="sendCodeBtn">Send Code</button>
+          </div>
+          <p class="hint">Padad-an ka ug 6-digit code sa imong Gmail.</p>
+        </div>
+
+        <div id="stepCode" style="display:none;">
+          <div class="field">
+            <label>Enter 6-digit code</label>
+            <input id="loginCode" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+          </div>
+          <div id="codeError"></div>
+          <div class="modal-actions">
+            <button class="btn-cancel" id="codeCancel">Cancel</button>
+            <button class="btn-primary" id="verifyCodeBtn">Log In</button>
+          </div>
+          <p class="hint">
+            Susiha imong Gmail inbox (ug Spam) para sa code.
+            <a href="#" id="resendLink">Resend code</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('loginCancel').onclick = ()=> overlay.remove();
+  document.getElementById('codeCancel').onclick = ()=> overlay.remove();
+
+  let otpToken = null;
+
+  async function sendCode(){
+    const u = document.getElementById('loginUser').value.trim().toLowerCase();
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('sendCodeBtn');
+    if(!u){ errEl.innerHTML = `<div class="error-msg">Isulat imong Gmail.</div>`; return; }
+    btn.disabled = true; btn.textContent = 'Sending...';
+    try{
+      const r = await callFn('send-otp', { email: u });
+      if(r.ok && r.token){
+        otpToken = r.token;
+        document.getElementById('stepEmail').style.display = 'none';
+        document.getElementById('stepCode').style.display = 'block';
+        document.getElementById('loginCode').focus();
+      } else if (r.ok) {
+        // Function responded 200 but no token means email not recognized —
+        // show same generic message either way (don't leak which emails are valid).
+        document.getElementById('stepEmail').style.display = 'none';
+        document.getElementById('stepCode').style.display = 'block';
+      } else {
+        errEl.innerHTML = `<div class="error-msg">${r.error || 'Naay problema, sulayi pag-usab.'}</div>`;
+      }
+    }catch(e){
+      errEl.innerHTML = `<div class="error-msg">Naay problema sa koneksyon, sulayi pag-usab.</div>`;
+    }
+    btn.disabled = false; btn.textContent = 'Send Code';
+  }
+
+  async function verifyCode(){
+    const code = document.getElementById('loginCode').value.trim();
+    const errEl = document.getElementById('codeError');
+    const btn = document.getElementById('verifyCodeBtn');
+    if(!code){ errEl.innerHTML = `<div class="error-msg">Isulat ang code.</div>`; return; }
+    if(!otpToken){ errEl.innerHTML = `<div class="error-msg">Sayop nga email o wala pa nadawat ang code.</div>`; return; }
+    btn.disabled = true; btn.textContent = 'Checking...';
+    try{
+      const r = await callFn('verify-otp', { token: otpToken, code });
+      if(r.ok && r.sessionToken){
+        localStorage.setItem(SESSION_KEY, r.sessionToken);
+        isAdmin = true;
+        overlay.remove();
+        render();
+      } else {
+        errEl.innerHTML = `<div class="error-msg">${r.error || 'Sayop ang code.'}</div>`;
+      }
+    }catch(e){
+      errEl.innerHTML = `<div class="error-msg">Naay problema sa koneksyon, sulayi pag-usab.</div>`;
+    }
+    btn.disabled = false; btn.textContent = 'Log In';
+  }
+
+  document.getElementById('sendCodeBtn').onclick = sendCode;
+  document.getElementById('loginUser').addEventListener('keydown', e=>{ if(e.key==='Enter') sendCode(); });
+  document.getElementById('verifyCodeBtn').onclick = verifyCode;
+  document.getElementById('loginCode').addEventListener('keydown', e=>{ if(e.key==='Enter') verifyCode(); });
+  document.getElementById('resendLink').onclick = (e)=>{ e.preventDefault(); sendCode(); };
+}
+
+/* Restore admin session (if any) on page load, so refresh doesn't log admin out */
+async function restoreSession(){
+  const token = localStorage.getItem(SESSION_KEY);
+  if(!token) return;
+  try{
+    const r = await callFn('check-session', { sessionToken: token });
+    if(r.valid){ isAdmin = true; }
+    else localStorage.removeItem(SESSION_KEY);
+  }catch(e){ /* offline or function unreachable — leave isAdmin as-is */ }
+}
+
+/* ---------- Contacts tab ---------- */
+function renderContacts(){
+  return `
+    <div class="page-head">
+      <h2>Contacts</h2>
+      <p>Reach the ECCD program office and key personnel.</p>
+    </div>
+    <div class="info-card">
+      ${isAdmin? `<button class="pill-btn edit-link" id="editContactsTabBtn">Edit</button>`:''}
+      <h3>Program Office</h3>
+      <p><b>ECCD Council Local Office</b></p>
+      <p>📍 ${escapeHtml(orgProfile.contacts.office)}</p>
+      <p>📞 ${escapeHtml(orgProfile.contacts.phone)} &nbsp; ✉️ ${escapeHtml(orgProfile.contacts.email)}</p>
+      <p>🕘 ${escapeHtml(orgProfile.contacts.hours)}</p>
+    </div>
+    <div class="info-card">
+      <h3>For Parents & Caregivers</h3>
+      <p>Questions about enrollment, schedules, or your barangay day care center? Contact the worker assigned to your center listed in the Directory tab.</p>
+    </div>
+  `;
+}
+
+/* ---------- Photos tab ---------- */
+function renderPhotos(){
+  const tiles = workers.map(w=>`
+    <div class="photo-tile">
+      <label class="ph${w.photo? ' has-photo':''}" data-phslot="${w.id}" style="${w.photo? `background-image:url('${w.photo}');`:''}">
+        ${!w.photo? initials(w.name) : ''}
+        ${isAdmin? `<span class="ph-edit-icon">📷</span><input type="file" accept="image/*" class="phInput" data-phid="${w.id}">`:''}
+        ${isAdmin && w.photo? `<button class="ph-rm" data-phremove="${w.id}" title="Remove photo">✕</button>`:''}
+      </label>
+      <div class="cap">${escapeHtml(w.name)}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="page-head">
+      <h2>Photos</h2>
+      <p>Worker ID portraits.${isAdmin? ' Click a tile to upload or change a photo.' : ''}</p>
+    </div>
+    <div class="photo-grid">${tiles}</div>
+  `;
+}
+function initials(name){
+  return name.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase();
+}
+function attachPhotosEvents(){
+  if(!isAdmin) return;
+  document.querySelectorAll('.phInput').forEach(inp=>{
+    inp.onchange = e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const id = parseInt(inp.dataset.phid);
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        const w = workers.find(w=>w.id===id);
+        if(w){ w.photo = ev.target.result; render(); }
+      };
+      reader.readAsDataURL(file);
+    };
+  });
+  document.querySelectorAll('[data-phremove]').forEach(btn=>{
+    btn.onclick = e=>{
+      e.preventDefault(); e.stopPropagation();
+      const id = parseInt(btn.dataset.phremove);
+      const w = workers.find(w=>w.id===id);
+      if(w){ w.photo = null; render(); }
+    };
+  });
+}
+
+function attachContactsEvents(){
+  if(!isAdmin) return;
+  const editBtn = document.getElementById('editContactsTabBtn');
+  if(editBtn) editBtn.onclick = showEditContactsModal;
+}
+
+function attachOtherEvents(){
+  if(!isAdmin) return;
+  const editBtn = document.getElementById('editOthersTabBtn');
+  if(editBtn) editBtn.onclick = showEditOthersModal;
+}
+
+/* ---------- Other tab ---------- */
+function renderOther(){
+  return `
+    <div class="page-head">
+      <h2>Other</h2>
+      <p>Resources, announcements, and program information.</p>
+    </div>
+    <div class="info-card">
+      ${isAdmin? `<button class="pill-btn edit-link" id="editOthersTabBtn">Edit</button>`:''}
+      <h3>${escapeHtml(orgProfile.others.aboutTitle)}</h3>
+      <p>${escapeHtml(orgProfile.others.aboutText)}</p>
+    </div>
+    <div class="info-card">
+      <h3>${escapeHtml(orgProfile.others.announcementsTitle)}</h3>
+      <p>${escapeHtml(orgProfile.others.announcementsText)}</p>
+    </div>
+    <div class="info-card">
+      <h3>${escapeHtml(orgProfile.others.resourcesTitle)}</h3>
+      <p>${escapeHtml(orgProfile.others.resourcesText)}</p>
+    </div>
+  `;
+}
+
+/* ---------- Profile tab (Facebook-style) ---------- */
+function renderProfile(){
+  const coverStyle = orgProfile.cover ? `style="background-image:url('${orgProfile.cover}')"` : '';
+  const avatarInner = orgProfile.avatar ? `<img src="${orgProfile.avatar}" alt="logo">` : `EC`;
+  return `
+    <div class="profile-wrap">
+      <div class="cover" id="coverEl" ${coverStyle}></div>
+      <div class="profile-head">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatarEl">${avatarInner}</div>
+          ${isAdmin? `<label class="avatar-edit-btn">📷<input type="file" accept="image/*" id="avatarInput" style="display:none;"></label>`:''}
+        </div>
+        <div class="profile-namebox">
+          <h2>${escapeHtml(orgProfile.name)}</h2>
+          <p>${escapeHtml(orgProfile.tagline)}</p>
+        </div>
+        ${isAdmin? `<div class="profile-actions"><button class="pill-btn solid" id="editProfileBtn">Edit Profile</button><button class="pill-btn" id="editBadgeBtn">🎨 Edit Badge</button></div>`:''}
+      </div>
+    </div>
+    <div class="profile-body">
+      <div class="profile-bio">
+        ${isAdmin? `<button class="pill-btn edit-link" id="editBioBtn">Edit</button>`:''}
+        <h3>About</h3>
+        <p>${escapeHtml(orgProfile.bio)}</p>
+      </div>
+      <div class="org-logos-row">
+        ${orgProfile.partnerLogos.map((logo,i)=>`
+          <div class="org-logo-card">
+            <label class="circle" data-logo="${i}">
+              ${logo? `<img src="${logo}" alt="partner logo">` : `<span class="plus">${isAdmin?'+':'🏷️'}</span>`}
+              ${isAdmin? `<input type="file" accept="image/*" class="partnerInput" data-idx="${i}">`:''}
+            </label>
+            <span>Partner Logo ${i+1}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="info-card">
+        ${isAdmin? `<button class="pill-btn edit-link" id="editContactsBtn">Edit</button>`:''}
+        <h3>Contact Information</h3>
+        <p><b>Program Office</b></p>
+        <p>${escapeHtml(orgProfile.contacts.office)}</p>
+        <p>📞 ${escapeHtml(orgProfile.contacts.phone)} &nbsp; ✉️ ${escapeHtml(orgProfile.contacts.email)}</p>
+        <p>🕘 ${escapeHtml(orgProfile.contacts.hours)}</p>
+      </div>
+      <div class="info-card">
+        ${isAdmin? `<button class="pill-btn edit-link" id="editOthersBtn">Edit</button>`:''}
+        <h3>${escapeHtml(orgProfile.others.aboutTitle)}</h3>
+        <p>${escapeHtml(orgProfile.others.aboutText)}</p>
+      </div>
+      <div class="info-card">
+        <h3>${escapeHtml(orgProfile.others.announcementsTitle)}</h3>
+        <p>${escapeHtml(orgProfile.others.announcementsText)}</p>
+      </div>
+      <div class="info-card">
+        <h3>${escapeHtml(orgProfile.others.resourcesTitle)}</h3>
+        <p>${escapeHtml(orgProfile.others.resourcesText)}</p>
+      </div>
+      <div class="profile-slideshow">
+        <h3>Photo Slideshow <span class="hint" style="font-weight:400;"></span></h3>
+        <div class="pf-slide-frame" id="pfSlideFrame">
+          ${orgProfile.introSlides.length === 0 ? `<div class="pf-slide-empty">No photos yet${isAdmin? ' — add some below.':'.'}</div>` : ''}
+          ${orgProfile.introSlides.map((src,i)=>`<div class="pf-slide${i===0?' active':''}" style="background-image:url('${src}')"></div>`).join('')}
+          ${orgProfile.introSlides.length > 1 ? `<div class="pf-dots">${orgProfile.introSlides.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : ''}
+        </div>
+        ${isAdmin? `
+          <p class="hint">Minimum ${MIN_INTRO_SLIDES}picture.${orgProfile.slideshowDraft.length}.</p>
+          <div class="pf-thumbs">
+            ${orgProfile.slideshowDraft.map((src,i)=>`
+              <div class="pf-thumb" style="background-image:url('${src}')" data-pfthumb="${i}" title="Click to replace this photo">
+                <button class="rm" data-pfremove="${i}" title="Remove">✕</button>
+                <input type="file" accept="image/*" class="pfReplaceInput" data-pfreplace="${i}" style="display:none;">
+              </div>
+            `).join('')}
+            <label class="pf-add-tile" title="Add photo">+<input type="file" accept="image/*" multiple id="pfAddInput"></label>
+          </div>
+          <div id="pfSaveError"></div>
+          <div class="pf-save-row">
+            ${pfHasUnsaved()? `<span class="pf-unsaved">Unsaved changes</span>` : `<span class="pf-saved">Naa-save na ang tanan.</span>`}
+            <button class="pill-btn solid" id="pfSaveBtn">Save</button>
+          </div>
+        `:''}
+      </div>
+    </div>
+  `;
+}
+
+function pfHasUnsaved(){
+  return JSON.stringify(orgProfile.introSlides) !== JSON.stringify(orgProfile.slideshowDraft);
+}
+
+function attachProfileEvents(){
+  setupProfileSlideshow();
+  if(!isAdmin) return;
+  const avatarInput = document.getElementById('avatarInput');
+  if(avatarInput){
+    avatarInput.onchange = e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev=>{ orgProfile.avatar = ev.target.result; render(); };
+      reader.readAsDataURL(file);
+    };
+  }
+  document.querySelectorAll('.partnerInput').forEach(inp=>{
+    inp.onchange = e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const idx = parseInt(inp.dataset.idx);
+      const reader = new FileReader();
+      reader.onload = ev=>{ orgProfile.partnerLogos[idx] = ev.target.result; render(); };
+      reader.readAsDataURL(file);
+    };
+  });
+  const editProfileBtn = document.getElementById('editProfileBtn');
+  if(editProfileBtn) editProfileBtn.onclick = showEditProfileModal;
+  const editBioBtn = document.getElementById('editBioBtn');
+  if(editBioBtn) editBioBtn.onclick = showEditProfileModal;
+  const editBadgeBtn = document.getElementById('editBadgeBtn');
+  if(editBadgeBtn) editBadgeBtn.onclick = showEditBadgeModal;
+  const editContactsBtn = document.getElementById('editContactsBtn');
+  if(editContactsBtn) editContactsBtn.onclick = showEditContactsModal;
+  const editOthersBtn = document.getElementById('editOthersBtn');
+  if(editOthersBtn) editOthersBtn.onclick = showEditOthersModal;
+
+  const pfAddInput = document.getElementById('pfAddInput');
+  if(pfAddInput){
+    pfAddInput.onchange = e=>{
+      const files = Array.from(e.target.files || []);
+      if(!files.length) return;
+      let remaining = files.length;
+      files.forEach(file=>{
+        const reader = new FileReader();
+        reader.onload = ev=>{
+          orgProfile.slideshowDraft.push(ev.target.result);
+          remaining--;
+          if(remaining===0) render();
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+  }
+  document.querySelectorAll('.pfReplaceInput').forEach(inp=>{
+    inp.onchange = e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const idx = parseInt(inp.dataset.pfreplace);
+      const reader = new FileReader();
+      reader.onload = ev=>{ orgProfile.slideshowDraft[idx] = ev.target.result; render(); };
+      reader.readAsDataURL(file);
+    };
+  });
+  document.querySelectorAll('[data-pfthumb]').forEach(thumb=>{
+    thumb.onclick = e=>{
+      if(e.target.closest('.rm')) return;
+      const inp = thumb.querySelector('.pfReplaceInput');
+      if(inp) inp.click();
+    };
+  });
+  document.querySelectorAll('[data-pfremove]').forEach(btn=>{
+    btn.onclick = e=>{
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.pfremove);
+      orgProfile.slideshowDraft.splice(idx,1);
+      render();
+    };
+  });
+  const pfSaveBtn = document.getElementById('pfSaveBtn');
+  if(pfSaveBtn){
+    pfSaveBtn.onclick = ()=>{
+      if(orgProfile.slideshowDraft.length < MIN_INTRO_SLIDES){
+        document.getElementById('pfSaveError').innerHTML =
+          `<div class="error-msg">At least ${MIN_INTRO_SLIDES}picture. Add ${MIN_INTRO_SLIDES - orgProfile.slideshowDraft.length}.</div>`;
+        return;
+      }
+      orgProfile.introSlides = orgProfile.slideshowDraft.slice();
+      if(pfSlideIdx >= orgProfile.introSlides.length) pfSlideIdx = 0;
+      renderIntroSlides();
+      render();
+    };
+  }
+}
+
+/* ---------- Profile slideshow autoplay ---------- */
+function setupProfileSlideshow(){
+  if(pfSlideTimer){ clearInterval(pfSlideTimer); pfSlideTimer = null; }
+  const frame = document.getElementById('pfSlideFrame');
+  if(!frame) return;
+  const slides = frame.querySelectorAll('.pf-slide');
+  const dots = frame.querySelectorAll('.pf-dots span');
+  if(slides.length <= 1) return;
+  if(pfSlideIdx >= slides.length) pfSlideIdx = 0;
+  pfSlideTimer = setInterval(()=>{
+    slides[pfSlideIdx].classList.remove('active');
+    if(dots[pfSlideIdx]) dots[pfSlideIdx].classList.remove('active');
+    pfSlideIdx = (pfSlideIdx+1) % slides.length;
+    slides[pfSlideIdx].classList.add('active');
+    if(dots[pfSlideIdx]) dots[pfSlideIdx].classList.add('active');
+  }, 3500);
+}
+
+function showEditProfileModal(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Edit Profile</h3>
+      <div class="field"><label>Organization name</label><input id="p_name" value="${escapeHtml(orgProfile.name)}"></div>
+      <div class="field"><label>Tagline</label><input id="p_tagline" value="${escapeHtml(orgProfile.tagline)}"></div>
+      <div class="field"><label>About / Bio</label><textarea id="p_bio" rows="5">${escapeHtml(orgProfile.bio)}</textarea></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="pCancel">Cancel</button>
+        <button class="btn-primary" id="pSave">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('pCancel').onclick = ()=> overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('pSave').onclick = ()=>{
+    orgProfile.name = document.getElementById('p_name').value.trim() || orgProfile.name;
+    orgProfile.tagline = document.getElementById('p_tagline').value.trim();
+    orgProfile.bio = document.getElementById('p_bio').value.trim();
+    overlay.remove();
+    render();
+  };
+}
+
+function showEditBadgeModal(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Edit Badge</h3>
+      <div class="field"><label>Badge Text</label><input id="badgeTextInput" value="${escapeHtml(orgProfile.badgeText)}" maxlength="4"></div>
+      <div class="field"><label>Badge Color</label><input type="color" id="badgeColorPicker" value="${orgProfile.badgeColor}"></div>
+      <div style="text-align:center;margin:20px 0;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:50%;background:${orgProfile.badgeColor};color:white;font-weight:800;font-size:1.8rem;" id="badgePreview">${escapeHtml(orgProfile.badgeText)}</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="badgeCancel">Cancel</button>
+        <button class="btn-primary" id="badgeSave">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('badgeCancel').onclick = ()=> overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+  
+  const textInput = document.getElementById('badgeTextInput');
+  const colorPicker = document.getElementById('badgeColorPicker');
+  const preview = document.getElementById('badgePreview');
+  
+  if(textInput){
+    textInput.oninput = (e)=>{
+      preview.textContent = e.target.value.toUpperCase();
+    };
+  }
+  
+  if(colorPicker){
+    colorPicker.oninput = (e)=>{
+      preview.style.background = e.target.value;
+    };
+  }
+  
+  document.getElementById('badgeSave').onclick = ()=>{
+    orgProfile.badgeText = document.getElementById('badgeTextInput').value.trim().toUpperCase() || "EC";
+    orgProfile.badgeColor = document.getElementById('badgeColorPicker').value;
+    overlay.remove();
+    render();
+  };
+}
+
+function showEditProfileModal(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Edit Profile</h3>
+      <div class="field"><label>Organization name</label><input id="p_name" value="${escapeHtml(orgProfile.name)}"></div>
+      <div class="field"><label>Tagline</label><input id="p_tagline" value="${escapeHtml(orgProfile.tagline)}"></div>
+      <div class="field"><label>About / Bio</label><textarea id="p_bio" rows="5">${escapeHtml(orgProfile.bio)}</textarea></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="pCancel">Cancel</button>
+        <button class="btn-primary" id="pSave">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('pCancel').onclick = ()=> overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('pSave').onclick = ()=>{
+    orgProfile.name = document.getElementById('p_name').value.trim() || orgProfile.name;
+    orgProfile.tagline = document.getElementById('p_tagline').value.trim();
+    orgProfile.bio = document.getElementById('p_bio').value.trim();
+    overlay.remove();
+    render();
+  };
+}
+
+function showEditContactsModal(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Edit Contact Information</h3>
+      <div class="field"><label>Office Address</label><input id="c_office" value="${escapeHtml(orgProfile.contacts.office)}"></div>
+      <div class="field"><label>Office Phone</label><input id="c_phone" value="${escapeHtml(orgProfile.contacts.phone)}"></div>
+      <div class="field"><label>Office Email</label><input id="c_email" value="${escapeHtml(orgProfile.contacts.email)}"></div>
+      <div class="field"><label>Office Hours</label><input id="c_hours" value="${escapeHtml(orgProfile.contacts.hours)}"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="cCancel">Cancel</button>
+        <button class="btn-primary" id="cSave">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('cCancel').onclick = ()=> overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('cSave').onclick = ()=>{
+    orgProfile.contacts.office = document.getElementById('c_office').value.trim();
+    orgProfile.contacts.phone = document.getElementById('c_phone').value.trim();
+    orgProfile.contacts.email = document.getElementById('c_email').value.trim();
+    orgProfile.contacts.hours = document.getElementById('c_hours').value.trim();
+    overlay.remove();
+    render();
+  };
+}
+
+function showEditOthersModal(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Edit Others</h3>
+      <div class="field"><label>About Title</label><input id="o_abtitle" value="${escapeHtml(orgProfile.others.aboutTitle)}"></div>
+      <div class="field"><label>About Text</label><textarea id="o_abtext" rows="3">${escapeHtml(orgProfile.others.aboutText)}</textarea></div>
+      <div class="field" style="margin-top:14px;"><label>Announcements Title</label><input id="o_anctitle" value="${escapeHtml(orgProfile.others.announcementsTitle)}"></div>
+      <div class="field"><label>Announcements Text</label><textarea id="o_anctext" rows="3">${escapeHtml(orgProfile.others.announcementsText)}</textarea></div>
+      <div class="field" style="margin-top:14px;"><label>Resources Title</label><input id="o_restitle" value="${escapeHtml(orgProfile.others.resourcesTitle)}"></div>
+      <div class="field"><label>Resources Text</label><textarea id="o_restext" rows="3">${escapeHtml(orgProfile.others.resourcesText)}</textarea></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="oCancel">Cancel</button>
+        <button class="btn-primary" id="oSave">Save</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.getElementById('oCancel').onclick = ()=> overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+  document.getElementById('oSave').onclick = ()=>{
+    orgProfile.others.aboutTitle = document.getElementById('o_abtitle').value.trim();
+    orgProfile.others.aboutText = document.getElementById('o_abtext').value.trim();
+    orgProfile.others.announcementsTitle = document.getElementById('o_anctitle').value.trim();
+    orgProfile.others.announcementsText = document.getElementById('o_anctext').value.trim();
+    orgProfile.others.resourcesTitle = document.getElementById('o_restitle').value.trim();
+    orgProfile.others.resourcesText = document.getElementById('o_restext').value.trim();
+    overlay.remove();
+    render();
+  };
+}
+
+/* ---------- Utilities ---------- */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- Tab nav ---------- */
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  currentTab = btn.dataset.tab;
+  render();
+});
+
+/* ---------- Intro slideshow ---------- */
+const MIN_INTRO_SLIDES = 5;
+const slidesEl = document.getElementById('introSlides');
+const dotsEl = document.getElementById('introDots');
+let slideIdx = 0;
+let introTimer = null;
+
+function renderIntroSlides(){
+  slidesEl.innerHTML = '';
+  dotsEl.innerHTML = '';
+  orgProfile.introSlides.forEach((url,i)=>{
+    const s = document.createElement('div');
+    s.className = 'intro-slide' + (i===0?' active':'');
+    s.style.backgroundImage = `url('${url}')`;
+    slidesEl.appendChild(s);
+    const d = document.createElement('span');
+    if(i===0) d.className='active';
+    dotsEl.appendChild(d);
+  });
+  slideIdx = 0;
+  if(introTimer){ clearInterval(introTimer); introTimer = null; }
+  if(orgProfile.introSlides.length > 1){
+    introTimer = setInterval(()=>{
+      const slides = slidesEl.children;
+      const dots = dotsEl.children;
+      slides[slideIdx].classList.remove('active');
+      dots[slideIdx].classList.remove('active');
+      slideIdx = (slideIdx+1) % slides.length;
+      slides[slideIdx].classList.add('active');
+      dots[slideIdx].classList.add('active');
+    }, 4200);
+  }
+}
+(async function init(){
+  await loadData();
+  renderIntroSlides();
+  applyBadgeColor();
+  document.getElementById('introCount').textContent = workers.length;
+  renderIntroLogos();
+  await restoreSession();
+  renderIntroLogos();
+  if(document.getElementById('mainApp').style.display==='block') render();
+})();
+document.getElementById('enterBtn').onclick = ()=>{
+  document.getElementById('introScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  render();
+};
+
+/* Intro logos — read-only, reflect whatever admin set in Profile tab */
+function renderIntroLogos(){
+  document.querySelectorAll('#introLogos .logo-slot').forEach((slot,i)=>{
+    const logo = orgProfile.partnerLogos[i];
+    slot.innerHTML = logo ? `<img src="${logo}" alt="logo ${i+1}">` : `<span class="plus">🏷️</span>`;
+  });
+  const introEditBtn = document.getElementById('introEditBtn');
+  const introLoginBtn = document.getElementById('introLoginBtn');
+  if(introEditBtn) introEditBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  if(introLoginBtn) introLoginBtn.style.display = isAdmin ? 'none' : 'inline-flex';
+}
+renderIntroLogos();
+document.getElementById('introEditBtn').onclick = ()=>{
+  document.getElementById('introScreen').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  currentTab = 'profile';
+  render();
+};
+document.getElementById('introLoginBtn').onclick = showLogin;
+
+/* Back to home button */
+document.getElementById('backHomeBtn').onclick = ()=>{
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('introScreen').style.display='flex';
+  renderIntroLogos();
+};
+
+
+
+
+
+</script>
+</body>
+</html>

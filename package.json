@@ -1,0 +1,10 @@
+{
+  "name": "eccd-worker-directory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ECCD Worker Directory static site with Netlify Functions for admin OTP login via Gmail.",
+  "dependencies": {
+    "nodemailer": "^6.9.14",
+    "@netlify/blobs": "^8.1.0"
+  }
+}
