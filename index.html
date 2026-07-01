@@ -789,19 +789,27 @@ function schedulePersist(){
 
 async function doPersist(){
   const token = localStorage.getItem(SESSION_KEY);
-  if(!token) return;
+  if(!token){ saveState = 'error'; updateSaveIndicator(); return; }
   saveTimer = null;
   saveState = 'saving';
   updateSaveIndicator();
   try{
-    await callFn('save-data', { sessionToken: token, data: { workers, nextId, orgProfile } });
-    saveState = 'saved';
+    const r = await callFn('save-data', { sessionToken: token, data: { workers, nextId, orgProfile } });
+    if(r.ok){
+      saveState = 'saved';
+    } else {
+      console.error('Auto-save rejected by server:', r.error || r);
+      saveState = 'error';
+      lastSaveError = r.error || 'Save failed';
+    }
   }catch(e){
     console.error('Auto-save failed:', e);
     saveState = 'error';
+    lastSaveError = 'Connection error';
   }
   updateSaveIndicator();
 }
+let lastSaveError = '';
 
 function updateSaveIndicator(){
   const el = document.getElementById('saveIndicator');
@@ -811,7 +819,7 @@ function updateSaveIndicator(){
     pending: '<span class="save-pending">● Unsaved changes...</span>',
     saving: '<span class="save-pending">● Saving...</span>',
     saved: '<span class="save-ok">✓ Naa-save na</span>',
-    error: '<span class="save-error">⚠ Wala ma-save — check connection</span>',
+    error: `<span class="save-error">⚠ Wala ma-save${lastSaveError? ': '+lastSaveError : ''} — check connection</span>`,
   };
   el.innerHTML = map[saveState] || '';
 }
